@@ -114,7 +114,7 @@
 | `aniv_hud_broadcast_key` | `C` | визуальный hold-индикатор |
 | `aniv_hud_faction_chat` | `1` | отправка в серверный канал |
 | `aniv_hud_ui_key` | `TAB` | временный курсор |
-| `aniv_hud_inventory_key` | `Q` | книга |
+| `aniv_hud_inventory_key` | `C` | книга (`Q` убран по просьбе пользователя; визуальный TX-индикатор тоже остаётся на `C` — ничего не переносили) |
 | `aniv_hud_interact_key` | `E` | Grab/Search |
 | `aniv_hud_free_cursor` | `0` | постоянный курсор (тест) |
 | `aniv_hud_ads_click` | `0` | курсор при прицеливании |

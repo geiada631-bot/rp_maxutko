@@ -2,7 +2,7 @@
  ANEURISM IV HUD - inventory book panel
  File: lua/autorun/client/aniv_hud_inventory.lua
 
- A clickable VGUI inventory opened by Q, by clicking the book icon or by
+ A clickable VGUI inventory opened by C, by clicking the book icon or by
  ANIV.OpenInventory(). It reuses the same grimy paper / green-border visual
  language as the in-game inventory and waypoint screens.
 ---------------------------------------------------------------------------]]
@@ -73,7 +73,7 @@ function PANEL:Paint(w, h)
 		end
 	end
 
-	ANIV.Text("[LMB] drop item     [Q] close     [TAB] HUD widgets",
+	ANIV.Text("[LMB] drop item     [C] close     [TAB] HUD widgets",
 		math.Round(14 * S), h - math.Round(20 * S), 10 * S, ANIV.COL.dim)
 end
 

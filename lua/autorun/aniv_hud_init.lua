@@ -132,19 +132,26 @@ if CLIENT then
 	CreateClientConVar("aniv_hud_enabled",        "1",    true, false, "Show the Aneurism IV HUD.")
 	CreateClientConVar("aniv_hud_scale",          "1",    true, false, "Global HUD scale (1 = 1080p reference).")
 	CreateClientConVar("aniv_hud_crt",            "1",    true, false, "Scanlines / CRT vignette.")
-	CreateClientConVar("aniv_hud_broadcast_key",  "C",    true, false, "Hold key for the visual TX indicator (the game uses X for voice).")
+	CreateClientConVar("aniv_hud_broadcast_key",  "C",    true, false, "Hold key for the visual TX indicator (unchanged, as requested).")
 	CreateClientConVar("aniv_hud_radio_key",      "F3",   true, false, "Toggle the cursor so the radio can be clicked.")
 	CreateClientConVar("aniv_hud_radio_chat_key", "X",    true, false, "Open faction radio chat while the radio is ON.")
 	CreateClientConVar("aniv_hud_faction_chat",   "1",    true, false, "Route radio messages only to the sender's faction channel.")
 	CreateClientConVar("aniv_hud_interact_key",   "E",    true, false, "Use / interact key shown in the UI.")
-	CreateClientConVar("aniv_hud_inventory_key",  "Q",    true, false, "Key that opens the inventory book.")
+	CreateClientConVar("aniv_hud_inventory_key",  "C",    true, false, "Key that opens the inventory book (Q removed by user request).")
 	CreateClientConVar("aniv_hud_ui_key",         "TAB",  true, false, "Hold this key to interact with HUD widgets.")
 	CreateClientConVar("aniv_hud_free_cursor",    "0",    true, false, "Always show the cursor (testing / click widgets freely).")
 	CreateClientConVar("aniv_hud_ads_click",      "0",    true, false, "Enable cursor while aiming (right mouse) so HUD widgets stay clickable.")
 	CreateClientConVar("aniv_hud_prompt_preview", "0",    true, false, "Draw both context prompts for previewing.")
 	CreateClientConVar("aniv_hud_prompt_dist",    "110",  true, false, "Max trace distance for context prompts.")
 	CreateClientConVar("aniv_hud_icon_labels",    "0",    true, false, "Draw tiny labels under status icons.")
-	CreateClientConVar("aniv_hud_bars_enabled",   "1",    true, false, "Draw the six ANEURISM IV stat bars instead of the four icons.")
+	CreateClientConVar("aniv_hud_bars_enabled",   "1",    true, false, "Draw the two ANEURISM IV stat bars instead of the four icons.")
+
+	-- One-time migration: old clients archived Q as the inventory key. The user
+	-- asked to remove Q entirely, so force C on those clients as well.
+	local invKey = GetConVar("aniv_hud_inventory_key")
+	if (invKey and string.upper(invKey:GetString()) == "Q") then
+		invKey:SetString("C")
+	end
 
 	---------------------------------------------------------------------------
 	-- Materials. The .vmt uses $pointsample (nearest-neighbour) so a texture

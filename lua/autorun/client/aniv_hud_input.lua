@@ -133,7 +133,7 @@ hook.Add("Think", "ANIV_HUD_Think", function()
 	ANIV.SetBroadcasting(ANIV.IsRadioActive()
 		and input.IsKeyDown(ANIV.Key(GetConVar("aniv_hud_broadcast_key"):GetString())))
 
-	-- Inventory book hotkey (Q in the original game).
+	-- Inventory book hotkey (C by user request; Q is no longer bound).
 	if PressedOnce(ANIV.Key(GetConVar("aniv_hud_inventory_key"):GetString()), "inv", "inventory") then
 		ANIV.ToggleInventory()
 		surface.PlaySound("buttons/lightswitch2.wav")
