@@ -30,7 +30,7 @@
 |---|---|
 | `lua/autorun/aniv_hud_init.lua` | Общий bootstrap: конвары, палитра, состояние, шрифты, материалы, 1:1-хелперы, публичный API, **серверная маршрутизация рации**, конкоманды |
 | `lua/autorun/aniv_hud_resources.lua` | Только SERVER: `resource.AddFile()` для 24 файлов (PNG/VMT/TTF) |
-| `lua/autorun/client/aniv_hud_core.lua` | Отрисовка: рация + LCD, книга, 4 иконки, подсказки, рамка чата, CRT. Экспортирует `ANIV.GetWidgetRects()` и `ANIV.GetRadioChatRect()` |
+| `lua/autorun/client/aniv_hud_core.lua` | Отрисовка: рация + LCD, книга, **6 полос статов**, legacy-4-иконки, подсказки, рамка чата, CRT. Экспортирует `ANIV.GetWidgetRects()`, `ANIV.GetRadioChatRect()`, `ANIV.GetBarRects()` |
 | `lua/autorun/client/aniv_hud_input.lua` | Ввод: F3/X/Q/E/TAB, клики по виджетам, `DTextEntry` чата, перехват `PlayerSay`, курсор |
 | `lua/autorun/client/aniv_hud_inventory.lua` | VGUI-панель инвентаря 4×4 (`ANIV_Inventory`) |
 | `materials/aneurism_hud/*.png|vmt` | Спрайт рации 371×413 (с вики), обложка книги, бумага/пластик/металл, иконки |
@@ -130,7 +130,8 @@
 - Радио: `x=22*S, y=16*S, w=250*S, h≈278*S`; LCD UV из `measurements.json`
   (источник 371×413: `u0=93/371, v0=254/413, u1=233/371, v1=340/413`).
 - Книга: `x=radio.x+56*S, y=radio.y+radio.h+10*S, 126×158`.
-- Иконки: 44px, gap 12, низ, чуть левее центра. Подсказки: `y=0.57*ScrH`.
+- **Полосы (по картинке пользователя, по умолчанию):** 6 капсул `202×42`, gap `8`, горизонтальный ряд по центру внизу, `y = ScrH()-42*S-30*S`; порядок blood/air/moisture/nourishment/sanity/sepsis; заливка = `bar_noise.png` (128×32) с tint цвета стата, ширина = `iw*value/100`; белый пиксельный текст по центру. Конвар `aniv_hud_bars_enabled 0` возвращает legacy-иконки.
+- Иконки (legacy): 44px, gap 12, низ, чуть левее центра. Подсказки: `y=0.57*ScrH`.
 - Никогда не показывать розово-чёрный чекербоард — fallback на плоский цвет.
 
 ---
@@ -195,7 +196,8 @@
 ## 10. Что осталось незаделанным / известные отличия
 
 - Оригинал показывает **7 шкал** (Sense/Blood/Air/Sanity/Sepsis/Nourishment/Moisture);
-  здесь реализованы **4 иконки** по ТЗ пользователя. Референс есть в `docs/refs/`.
+  здесь реализованы **6 полос** из картинки пользователя (без Sense). Старые 4 иконки
+  доступны через `aniv_hud_bars_enabled 0`. Референс 7 полос — в `docs/refs/`.
 - Текст LCD адаптирован под фракционную рацию; шрифт/положение/цвет — 1:1.
 - Голосовая трансляция заменена текстовым чатом (по просьбе пользователя).
 - Шрифты — OFL-аналоги (`Silkscreen`, `VT323`), не родной TMP-атлас игры.

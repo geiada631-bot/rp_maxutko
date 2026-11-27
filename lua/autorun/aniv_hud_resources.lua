@@ -44,6 +44,9 @@ local FILES = {
 	"materials/aneurism_hud/icon_check.png",
 	"materials/aneurism_hud/icon_eye.vmt",
 	"materials/aneurism_hud/icon_eye.png",
+	-- Six stat bars: speckled noise fill.
+	"materials/aneurism_hud/bar_noise.vmt",
+	"materials/aneurism_hud/bar_noise.png",
 	-- Pixel fonts used by the HUD.
 	"resource/fonts/Silkscreen-Regular.ttf",
 	"resource/fonts/VT323-Regular.ttf",

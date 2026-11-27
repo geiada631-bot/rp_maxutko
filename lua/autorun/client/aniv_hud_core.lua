@@ -289,7 +289,9 @@ local function DrawStatusIcons(S)
 			end
 			local py = ANIV.Snap(y + is * (1 - v))
 			local ph = math.max(1, ANIV.Snap(is * v))
-			render.SetScissorRect(x, py, is, ph, true)
+			-- SetScissorRect takes x0,y0,x1,y1 with the origin at the BOTTOM
+			-- left, not x,y,w,h. The old call left h nil visually (no fill).
+			render.SetScissorRect(x, ScrH() - py - ph, x + is, ScrH() - py, true)
 			if not ANIV.DrawIcon(def.tex, x, y, is, col) then
 				ANIV.DrawPattern(pat, x, y, is, col)
 			end
@@ -303,6 +305,79 @@ local function DrawStatusIcons(S)
 			ANIV.Text(string.upper(def.name), x + is * 0.5, y + is + 3 * S,
 				8 * S, ANIV.COL.dim, TEXT_ALIGN_CENTER, nil, true, 0)
 		end
+	end
+end
+
+---------------------------------------------------------------------------
+-- ANEURISM IV stat bars (six horizontal grimy capsules)
+---------------------------------------------------------------------------
+local BARS = {
+	{ key = "blood",       label = "blood",       col = Color(158, 32, 28, 255) },
+	{ key = "air",         label = "air",         col = Color( 42, 72, 194, 255) },
+	{ key = "moisture",    label = "moisture",    col = Color( 30, 158, 176, 255) },
+	{ key = "nourishment", label = "nourishment", col = Color(176, 138, 32, 255) },
+	{ key = "sanity",      label = "sanity",      col = Color(142, 46, 168, 255) },
+	{ key = "sepsis",      label = "sepsis",      col = Color( 42, 164, 62, 255) },
+}
+
+--- rectangles of the six bars (bottom-centre, one horizontal row)
+function ANIV.GetBarRects()
+	local S = ANIV.S()
+	local bw = ANIV.Snap(202 * S)
+	local bh = ANIV.Snap(42 * S)
+	local gap = ANIV.Snap(8 * S)
+	local total = #BARS * bw + (#BARS - 1) * gap
+	local x0 = ANIV.Snap(ScrW() * 0.5 - total * 0.5)
+	local y  = ANIV.Snap(ScrH() - bh - 30 * S)
+
+	local out = {}
+	for i = 1, #BARS do
+		out[i] = { x = x0 + (i - 1) * (bw + gap), y = y, w = bw, h = bh }
+	end
+	return out
+end
+
+local function DrawStatBars(S)
+	local rects = ANIV.GetBarRects()
+	local noise = ANIV.MAT.barNoise
+	local tex = ANIV.TEX.bar_noise
+	local metalW, metalH = ANIV.TEX.metal.w, ANIV.TEX.metal.h
+
+	for i, def in ipairs(BARS) do
+		local r = rects[i]
+		local x, y, w, h = r.x, r.y, r.w, r.h
+		local radius = math.max(2, ANIV.Snap(h * 0.28))
+
+		-- shadow, then the worn grey metal capsule
+		draw.RoundedBox(radius, x + 2, y + 3, w, h, Color(0, 0, 0, 150))
+		draw.RoundedBox(radius, x, y, w, h, Color(74, 76, 70, 255))
+		ANIV.DrawTexTiled(ANIV.MAT.metal, x, y, w, h, metalW, metalH,
+			Color(70, 74, 68, 255), Color(120, 124, 116, 70))
+
+		-- recessed dark well
+		local pad = math.max(2, ANIV.Snap(4 * S))
+		local ix, iy = x + pad, y + pad
+		local iw, ih = w - pad * 2, h - pad * 2
+		draw.RoundedBox(math.max(1, radius - pad), ix, iy, iw, ih, Color(10, 11, 10, 255))
+
+		-- dim speckled base (black stays black, speckles become faint grey)
+		ANIV.DrawTexTiled(noise, ix, iy, iw, ih, tex.w, tex.h,
+			Color(10, 11, 10, 255), Color(32, 36, 32, 255))
+
+		-- coloured noisy fill, left to right, width == stat value %
+		local v = math.Clamp(ANIV.GetStat(def.key) / 100, 0, 1)
+		local fw = ANIV.Snap(iw * v)
+		if fw > 0 then
+			ANIV.DrawTexTiled(noise, ix, iy, fw, ih, tex.w, tex.h,
+				Color(20, 20, 20, 255), def.col)
+		end
+
+		surface.SetDrawColor(0, 0, 0, 180)
+		surface.DrawOutlinedRect(ix, iy, iw, ih, 1)
+
+		-- white pixel label centred in the capsule (exact words from the game)
+		ANIV.Text(def.label, x + w * 0.5, y + h * 0.5, 15 * S,
+			Color(232, 232, 222, 255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, false, 1)
 	end
 end
 
@@ -422,7 +497,11 @@ hook.Add("HUDPaint", "ANIV_HUD_Paint", function()
 	local S = ANIV.Scale()
 	DrawRadio(S)
 	DrawBook(S)
-	DrawStatusIcons(S)
+	if GetConVar("aniv_hud_bars_enabled"):GetBool() then
+		DrawStatBars(S)
+	else
+		DrawStatusIcons(S) -- legacy four-icon HUD
+	end
 	DrawPrompts(S)
 	DrawRadioChatFrame(S)
 	DrawCRT(S)

@@ -113,3 +113,24 @@ $br.Dispose()
 $g.Dispose()
 Add-Scratches $bmp 60 ([System.Drawing.Color]::FromArgb(20, 104, 94, 72)) 46
 Save-Png $bmp "book_cover.png"
+
+# --- bar_noise.png : speckled fill for the ANEURISM IV stat bars -----------
+# Opaque black background + white/grey speckles. It is drawn tinted with the
+# stat colour (black stays black, speckles become coloured noise), which is
+# exactly the grimy CRT look of the original blood/air/... bars.
+$bmp = New-Object System.Drawing.Bitmap(128, 32)
+$g = [System.Drawing.Graphics]::FromImage($bmp)
+$g.Clear([System.Drawing.Color]::FromArgb(0, 0, 0))
+$g.Dispose()
+for ($y = 0; $y -lt 32; $y++) {
+    # faint horizontal banding, like a dirty LCD
+    $band = $rnd.Next(4, 15)
+    for ($x = 0; $x -lt 128; $x++) {
+        $v = $band + $rnd.Next(0, 26)
+        if ($rnd.Next(0, 100) -lt 12) { $v = $rnd.Next(70, 190) }
+        if ($rnd.Next(0, 100) -lt 2)  { $v = $rnd.Next(190, 255) }
+        if ($v -gt 255) { $v = 255 }
+        $bmp.SetPixel($x, $y, [System.Drawing.Color]::FromArgb($v, $v, $v))
+    }
+}
+Save-Png $bmp "bar_noise.png"

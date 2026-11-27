@@ -48,7 +48,12 @@ ANIV.State = {
 	uiMode       = false,  -- cursor is visible (F3 / TAB / inventory / chat)
 	inventoryOpen = false,
 	inventory    = {},     -- array of item names, e.g. {"Ration", "Pipe"}
-	stats        = { blood = 100, air = 100, sanity = 100, bone = 100, leg = 100 },
+	-- Six HUD bars from ANEURISM IV: blood/air/moisture/nourishment/sanity/sepsis.
+	-- bone/leg are kept for the legacy four-icon HUD (aniv_hud_bars_enabled 0).
+	stats        = {
+		blood = 100, air = 100, moisture = 100, nourishment = 100,
+		sanity = 100, sepsis = 0, bone = 100, leg = 100,
+	},
 }
 
 if SERVER then
@@ -139,6 +144,7 @@ if CLIENT then
 	CreateClientConVar("aniv_hud_prompt_preview", "0",    true, false, "Draw both context prompts for previewing.")
 	CreateClientConVar("aniv_hud_prompt_dist",    "110",  true, false, "Max trace distance for context prompts.")
 	CreateClientConVar("aniv_hud_icon_labels",    "0",    true, false, "Draw tiny labels under status icons.")
+	CreateClientConVar("aniv_hud_bars_enabled",   "1",    true, false, "Draw the six ANEURISM IV stat bars instead of the four icons.")
 
 	---------------------------------------------------------------------------
 	-- Materials. The .vmt uses $pointsample (nearest-neighbour) so a texture
@@ -165,6 +171,7 @@ if CLIENT then
 	ANIV.MAT.plastic= M("plastic")
 	ANIV.MAT.metal  = M("metal")
 	ANIV.MAT.book   = M("book_cover")
+	ANIV.MAT.barNoise = M("bar_noise") -- speckled fill for the six stat bars
 
 	-- UI glyphs. The first four are the *original* 16x16 sprites shipped with
 	-- ANEURISM IV (game-icons.net set); bone/leg are rendered from the same
@@ -184,6 +191,7 @@ if CLIENT then
 		paper   = { w = 128, h = 128 },
 		plastic = { w = 128, h = 128 },
 		metal   = { w = 128, h = 128 },
+		bar_noise = { w = 128, h = 32 },
 	}
 
 	-- Exact UV rect of the LCD on the radio sprite (measured in source px:
@@ -414,6 +422,9 @@ if CLIENT then
 	function ANIV.SetBlood(v)   ANIV.SetStat("blood", v)  end
 	function ANIV.SetAir(v)     ANIV.SetStat("air", v)    end
 	function ANIV.SetSanity(v)  ANIV.SetStat("sanity", v) end
+	function ANIV.SetMoisture(v)    ANIV.SetStat("moisture", v)    end
+	function ANIV.SetNourishment(v) ANIV.SetStat("nourishment", v) end
+	function ANIV.SetSepsis(v)      ANIV.SetStat("sepsis", v)      end
 
 	-- Faction radio -----------------------------------------------------------
 	-- "Muted" is just the inverse of "radio active". SetMuted() is kept as an

@@ -60,6 +60,15 @@ local function Install()
         local bone = tonumber(character:GetData("bones", character:GetData("bone", 100))) or 100
         ANIV.SetStat("bone", math.Clamp(bone, 0, 100))
 
+        -- Six stat bars: thirst / hunger / sepsis. Fall back to inert values
+        -- when the schema does not track them yet.
+        local moisture = tonumber(character:GetData("moisture", 100)) or 100
+        local nourishment = tonumber(character:GetData("nourishment", 100)) or 100
+        local sepsis = tonumber(character:GetData("sepsis", character:GetData("sepsis_level", 0))) or 0
+        ANIV.SetStat("moisture", math.Clamp(moisture, 0, 100))
+        ANIV.SetStat("nourishment", math.Clamp(nourishment, 0, 100))
+        ANIV.SetStat("sepsis", math.Clamp(sepsis, 0, 100))
+
         -- Inventory book counter: real Helix inventory items.
         local inventory = character:GetInventory()
         if (inventory and istable(inventory.items)) then
