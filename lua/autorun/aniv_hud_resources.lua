@@ -44,6 +44,9 @@ local FILES = {
 	"materials/aneurism_hud/icon_check.png",
 	"materials/aneurism_hud/icon_eye.vmt",
 	"materials/aneurism_hud/icon_eye.png",
+	-- Real ANEURISM IV UI sprites used by the MYRP interaction menu.
+	"materials/aneurism_hud/ui_button_bg.png",
+	"materials/aneurism_hud/ui_panel.png",
 	-- Two stat bars: original capsule frame + tintable noise fill.
 	"materials/aneurism_hud/bar_frame.vmt",
 	"materials/aneurism_hud/bar_frame.png",
