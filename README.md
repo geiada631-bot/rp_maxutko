@@ -1,9 +1,10 @@
 # ANEURISM IV HUD для Garry's Mod (v1.1.0)
 
 Аддон воссоздаёт HUD игры **ANEURISM IV** (Vellocet Software) и добавляет
-**фракционную рацию**: рация с динамическим LCD, книга-инвентарь, 6 горизонтальных
-полос состояния (`blood`, `air`, `moisture`, `nourishment`, `sanity`, `sepsis`),
-подсказки `Grab`/`Search` и CRT-оверлей. Старые 4 иконки — `aniv_hud_bars_enabled 0`.
+**фракционную рацию**: рация с динамическим LCD, книга-инвентарь, только две
+полосы состояния `BLOOD` (здоровье) и `AIR` (энергия/stamina) с настоящими
+спрайтами из игры, подсказки `Grab`/`Search` и CRT-оверлей.
+Старые 4 иконки — `aniv_hud_bars_enabled 0`.
 
 > **Другая нейронка/разработчик:** перед правками обязательно прочитай
 > [`CHECKLIST_AI.md`](CHECKLIST_AI.md) — там карта файлов, state machine рации,

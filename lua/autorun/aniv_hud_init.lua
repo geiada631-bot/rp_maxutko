@@ -171,7 +171,8 @@ if CLIENT then
 	ANIV.MAT.plastic= M("plastic")
 	ANIV.MAT.metal  = M("metal")
 	ANIV.MAT.book   = M("book_cover")
-	ANIV.MAT.barNoise = M("bar_noise") -- speckled fill for the six stat bars
+	ANIV.MAT.barNoise = M("bar_noise") -- speckled fill, tinted per stat
+	ANIV.MAT.barFrame = M("bar_frame") -- original worn capsule from the game sprite
 
 	-- UI glyphs. The first four are the *original* 16x16 sprites shipped with
 	-- ANEURISM IV (game-icons.net set); bone/leg are rendered from the same
@@ -192,6 +193,7 @@ if CLIENT then
 		plastic = { w = 128, h = 128 },
 		metal   = { w = 128, h = 128 },
 		bar_noise = { w = 128, h = 32 },
+		bar_frame = { w = 265, h = 39 },
 	}
 
 	-- Exact UV rect of the LCD on the radio sprite (measured in source px:

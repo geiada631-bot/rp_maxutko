@@ -309,22 +309,22 @@ local function DrawStatusIcons(S)
 end
 
 ---------------------------------------------------------------------------
--- ANEURISM IV stat bars (six horizontal grimy capsules)
+-- ANEURISM IV stat bars: only BLOOD and AIR (= stamina), from the game art
 ---------------------------------------------------------------------------
 local BARS = {
-	{ key = "blood",       label = "blood",       col = Color(158, 32, 28, 255) },
-	{ key = "air",         label = "air",         col = Color( 42, 72, 194, 255) },
-	{ key = "moisture",    label = "moisture",    col = Color( 30, 158, 176, 255) },
-	{ key = "nourishment", label = "nourishment", col = Color(176, 138, 32, 255) },
-	{ key = "sanity",      label = "sanity",      col = Color(142, 46, 168, 255) },
-	{ key = "sepsis",      label = "sepsis",      col = Color( 42, 164, 62, 255) },
+	{ key = "blood", label = "BLOOD", col = Color(196, 44, 36, 255) },
+	{ key = "air",   label = "AIR",   col = Color( 52, 96, 226, 255) },
 }
 
---- rectangles of the six bars (bottom-centre, one horizontal row)
+-- Native capsule from the game screenshot: 265x39; interior fill window.
+local FRAME_W, FRAME_H = 265, 39
+local FILL_X, FILL_Y, FILL_W, FILL_H = 20, 8, 225, 23
+
+--- rectangles of the two bars (bottom-centre, one horizontal row)
 function ANIV.GetBarRects()
 	local S = ANIV.S()
-	local bw = ANIV.Snap(202 * S)
-	local bh = ANIV.Snap(42 * S)
+	local bw = ANIV.Snap(FRAME_W * S)
+	local bh = ANIV.Snap(FRAME_H * S)
 	local gap = ANIV.Snap(8 * S)
 	local total = #BARS * bw + (#BARS - 1) * gap
 	local x0 = ANIV.Snap(ScrW() * 0.5 - total * 0.5)
@@ -341,43 +341,35 @@ local function DrawStatBars(S)
 	local rects = ANIV.GetBarRects()
 	local noise = ANIV.MAT.barNoise
 	local tex = ANIV.TEX.bar_noise
-	local metalW, metalH = ANIV.TEX.metal.w, ANIV.TEX.metal.h
 
 	for i, def in ipairs(BARS) do
 		local r = rects[i]
-		local x, y, w, h = r.x, r.y, r.w, r.h
-		local radius = math.max(2, ANIV.Snap(h * 0.28))
+		local x, y = r.x, r.y
 
-		-- shadow, then the worn grey metal capsule
-		draw.RoundedBox(radius, x + 2, y + 3, w, h, Color(0, 0, 0, 150))
-		draw.RoundedBox(radius, x, y, w, h, Color(74, 76, 70, 255))
-		ANIV.DrawTexTiled(ANIV.MAT.metal, x, y, w, h, metalW, metalH,
-			Color(70, 74, 68, 255), Color(120, 124, 116, 70))
+		-- The original worn capsule, taken from the real HUD sprite.
+		ANIV.DrawTex(ANIV.MAT.barFrame, x, y, r.w, r.h, Color(58, 60, 54, 255))
 
-		-- recessed dark well
-		local pad = math.max(2, ANIV.Snap(4 * S))
-		local ix, iy = x + pad, y + pad
-		local iw, ih = w - pad * 2, h - pad * 2
-		draw.RoundedBox(math.max(1, radius - pad), ix, iy, iw, ih, Color(10, 11, 10, 255))
+		-- Its interior window, scaled from the source pixels.
+		local ix = ANIV.Snap(x + FILL_X * S)
+		local iy = ANIV.Snap(y + FILL_Y * S)
+		local iw = ANIV.Snap(FILL_W * S)
+		local ih = ANIV.Snap(FILL_H * S)
 
-		-- dim speckled base (black stays black, speckles become faint grey)
+		-- Unfilled part: grey speckles (the empty segment in the game HUD).
 		ANIV.DrawTexTiled(noise, ix, iy, iw, ih, tex.w, tex.h,
-			Color(10, 11, 10, 255), Color(32, 36, 32, 255))
+			Color(24, 24, 24, 255), Color(96, 98, 92, 255))
 
-		-- coloured noisy fill, left to right, width == stat value %
+		-- Filled part: the real noise pattern tinted red / blue, left to right.
 		local v = math.Clamp(ANIV.GetStat(def.key) / 100, 0, 1)
 		local fw = ANIV.Snap(iw * v)
 		if fw > 0 then
 			ANIV.DrawTexTiled(noise, ix, iy, fw, ih, tex.w, tex.h,
-				Color(20, 20, 20, 255), def.col)
+				Color(16, 16, 16, 255), def.col)
 		end
 
-		surface.SetDrawColor(0, 0, 0, 180)
-		surface.DrawOutlinedRect(ix, iy, iw, ih, 1)
-
-		-- white pixel label centred in the capsule (exact words from the game)
-		ANIV.Text(def.label, x + w * 0.5, y + h * 0.5, 15 * S,
-			Color(232, 232, 222, 255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, false, 1)
+		-- Uppercase pixel label, exactly as on the screenshot.
+		ANIV.Text(def.label, x + r.w * 0.5, y + r.h * 0.5, 15 * S,
+			Color(238, 238, 230, 255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, false, 1)
 	end
 end
 
