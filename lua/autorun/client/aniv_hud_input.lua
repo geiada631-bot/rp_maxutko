@@ -133,11 +133,7 @@ hook.Add("Think", "ANIV_HUD_Think", function()
 	ANIV.SetBroadcasting(ANIV.IsRadioActive()
 		and input.IsKeyDown(ANIV.Key(GetConVar("aniv_hud_broadcast_key"):GetString())))
 
-	-- Inventory book hotkey (C by user request; Q is no longer bound).
-	if PressedOnce(ANIV.Key(GetConVar("aniv_hud_inventory_key"):GetString()), "inv", "inventory") then
-		ANIV.ToggleInventory()
-		surface.PlaySound("buttons/lightswitch2.wav")
-	end
+	-- The inventory VGUI was removed by user request: C/Q do nothing here.
 
 	-- Context interaction (E in the original game).
 	if PressedOnce(ANIV.Key(GetConVar("aniv_hud_interact_key"):GetString()), "use", "interact") then
@@ -176,11 +172,7 @@ hook.Add("GUIMousePressed", "ANIV_HUD_Click", function(code)
 		return true
 	end
 
-	if ANIV.InRect(mx, my, R.book.x, R.book.y, R.book.w, R.book.h) then
-		ANIV.ToggleInventory()
-		surface.PlaySound("buttons/lightswitch2.wav")
-		return true
-	end
+	-- The book icon is decorative now: clicking it does not open any menu.
 end)
 
 ---------------------------------------------------------------------------

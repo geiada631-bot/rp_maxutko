@@ -137,7 +137,6 @@ if CLIENT then
 	CreateClientConVar("aniv_hud_radio_chat_key", "X",    true, false, "Open faction radio chat while the radio is ON.")
 	CreateClientConVar("aniv_hud_faction_chat",   "1",    true, false, "Route radio messages only to the sender's faction channel.")
 	CreateClientConVar("aniv_hud_interact_key",   "E",    true, false, "Use / interact key shown in the UI.")
-	CreateClientConVar("aniv_hud_inventory_key",  "C",    true, false, "Key that opens the inventory book (Q removed by user request).")
 	CreateClientConVar("aniv_hud_ui_key",         "TAB",  true, false, "Hold this key to interact with HUD widgets.")
 	CreateClientConVar("aniv_hud_free_cursor",    "0",    true, false, "Always show the cursor (testing / click widgets freely).")
 	CreateClientConVar("aniv_hud_ads_click",      "0",    true, false, "Enable cursor while aiming (right mouse) so HUD widgets stay clickable.")
@@ -146,12 +145,7 @@ if CLIENT then
 	CreateClientConVar("aniv_hud_icon_labels",    "0",    true, false, "Draw tiny labels under status icons.")
 	CreateClientConVar("aniv_hud_bars_enabled",   "1",    true, false, "Draw the two ANEURISM IV stat bars instead of the four icons.")
 
-	-- One-time migration: old clients archived Q as the inventory key. The user
-	-- asked to remove Q entirely, so force C on those clients as well.
-	local invKey = GetConVar("aniv_hud_inventory_key")
-	if (invKey and string.upper(invKey:GetString()) == "Q") then
-		invKey:SetString("C")
-	end
+	-- The old inventory key convar and its VGUI panel were removed by request.
 
 	---------------------------------------------------------------------------
 	-- Materials. The .vmt uses $pointsample (nearest-neighbour) so a texture
@@ -496,6 +490,13 @@ if CLIENT then
 	end
 
 	function ANIV.InventoryCount() return #ANIV.State.inventory end
+
+	-- The VGUI inventory panel was removed entirely by user request. Keep these
+	-- as no-ops so gamemode code calling the old API never throws. The book icon
+	-- remains only as a decorative item counter.
+	function ANIV.OpenInventory() end
+	function ANIV.CloseInventory() ANIV.State.inventoryOpen = false end
+	function ANIV.ToggleInventory() end
 
 	function ANIV.ToggleHUD()
 		ANIV.State.hudVisible = not ANIV.State.hudVisible
