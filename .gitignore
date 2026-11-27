@@ -1,0 +1,12 @@
+*.log
+*.bak
+*.bak_*
+*.backup*
+*.old
+*.rar
+*.zip
+**/.git/
+**/_backups/
+**/_backup_*/
+Thumbs.db
+desktop.ini

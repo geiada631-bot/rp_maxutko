@@ -1,0 +1,8 @@
+"UnlitGeneric"
+{
+	"$basetexture" "aneurism_hud/paper"
+	"$vertexalpha" "1"
+	"$vertexcolor" "1"
+	"$nocull" "1"
+	"$pointsample" "1"
+}

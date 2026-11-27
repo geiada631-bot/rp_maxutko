@@ -1,0 +1,111 @@
+{
+  "_comment": "Measured values used by the addon. Every number here was obtained by scanning the real sprite/reference pixels (Pillow), not estimated by eye. The Lua copies live in ANIV.RADIO_LCD_UV / ANIV.ICON / ANIV.TEX.",
+  "reference": {
+    "width": 1920,
+    "height": 1080,
+    "scale_formula": "S = clamp(ScrH()/1080, 0.55, 1.65) * aniv_hud_scale"
+  },
+  "radio": {
+    "sprite": "materials/aneurism_hud/walkie_talkie.png",
+    "source": "https://aneurism.wiki.gg/wiki/File:Walkie_talkie_(1).png",
+    "native_px": { "w": 371, "h": 413 },
+    "alpha_bbox_px": { "x0": 31, "y0": 13, "x1": 293, "y1": 389 },
+    "layout_1080p": { "x": 22, "y": 16, "w": 250, "h": 278.2 },
+    "lcd_panel_px": { "x0": 86, "y0": 250, "x1": 240, "y1": 340 },
+    "lcd_bright_px": { "x0": 93, "y0": 254, "x1": 232, "y1": 339 },
+    "lcd_uv": {
+      "u0": 0.250674,
+      "v0": 0.615012,
+      "u1": 0.628032,
+      "v1": 0.823245
+    },
+    "lcd_colors_hex": {
+      "base": "#BA9654",
+      "glow": "#D6B676",
+      "shadow": "#3C2C14",
+      "text": "#2A1A0C",
+      "broadcast_text": "#601E12",
+      "broadcast_dot": "#BE3022"
+    },
+    "lcd_lines": [
+      "UNMUTED. | MUTED. | BROADCASTING",
+      "Click to mute.",
+      "Hold <key> to",
+      "broadcast."
+    ]
+  },
+  "book": {
+    "sprite": "materials/aneurism_hud/book_cover.png",
+    "native_px": { "w": 256, "h": 320 },
+    "layout_1080p": { "x": 78, "y": 304, "w": 126, "h": 158 },
+    "offset_from_radio": { "x": 56, "y_gap": 10 },
+    "symbol": "psi with crossbar (trident), dark brown #26201A",
+    "counter": "inventory item count, centered near the bottom"
+  },
+  "status_icons": {
+    "layout_1080p": { "size": 44, "gap": 12, "anchor": "bottom, slightly left of center" },
+    "fill": "bright glyph revealed bottom-up with render.SetScissorRect",
+    "blink": "value < 30% -> red #EC4638 at 3 Hz",
+    "plate": "metal.png tiled 1 texel = 1 px + dark inset",
+    "icons": [
+      {
+        "stat": "blood",
+        "label": "Blood / health",
+        "texture": "icon_blood.png",
+        "native_px": { "w": 16, "h": 16 },
+        "source": "ANEURISM IV data.unity3d -> blood_1708.png",
+        "color_hex": "#C6302C"
+      },
+      {
+        "stat": "bone",
+        "label": "Broken bone",
+        "texture": "icon_bone.png",
+        "native_px": { "w": 32, "h": 32 },
+        "source": "game-icons.net/lorc/broken-bone.svg (same icon set the game uses)",
+        "color_hex": "#D6BC48"
+      },
+      {
+        "stat": "leg",
+        "label": "Leg / air (stamina)",
+        "texture": "icon_leg.png",
+        "native_px": { "w": 16, "h": 16 },
+        "source": "game-icons.net/delapouite/leg.svg (same icon set the game uses)",
+        "color_hex": "#C49E36"
+      },
+      {
+        "stat": "sanity",
+        "label": "Sanity",
+        "texture": "icon_skull.png",
+        "native_px": { "w": 16, "h": 16 },
+        "source": "ANEURISM IV data.unity3d -> skull_812.png",
+        "color_hex": "#588AC4"
+      }
+    ]
+  },
+  "prompts": {
+    "layout_1080p": { "y": 615.6, "icon_size": 16, "icon_gap": 7, "font_size": 19 },
+    "grab": {
+      "texture": "icon_check.png",
+      "native_px": { "w": 11, "h": 11 },
+      "source": "ANEURISM IV data.unity3d -> UICheckMark_1389.png",
+      "color_hex": "#5ED65C"
+    },
+    "search": {
+      "texture": "icon_eye.png",
+      "native_px": { "w": 16, "h": 16 },
+      "source": "ANEURISM IV data.unity3d -> eye_552.png",
+      "color_hex": "#E6E4D2"
+    }
+  },
+  "reference_hud_bars": {
+    "file": "docs/refs/hud_bars_reference.png",
+    "size_px": { "w": 363, "h": 310 },
+    "note": "Wiki HUDBarsUpdate17 crop: seven stat bars (Sense, Blood, Air, Moisture, Nourishment, Sanity, Sepsis). Each row is ~22 px tall, bar body x 90..252, icon column x 66..87. The addon implements the four icons requested in the brief; the seven-bar reference is kept for a future full-stat layout.",
+    "row_tops_px": [8, 51, 94, 137, 180, 223, 266]
+  },
+  "fonts": {
+    "in_game": "XTypewriter SDF (TextMeshPro), CourierNew SDF for status text",
+    "addon": ["Silkscreen (labels/numbers)", "VT323 (LCD terminal)"],
+    "note": "The game ships a TMP glyph atlas, not a TTF, so a free OFL lookalike is used."
+  }
+}
