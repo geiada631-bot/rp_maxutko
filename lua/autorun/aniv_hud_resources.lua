@@ -21,9 +21,6 @@ local FILES = {
 	-- Radio sprite + its material (both are required: the VMT points at the PNG).
 	"materials/aneurism_hud/walkie_talkie.vmt",
 	"materials/aneurism_hud/walkie_talkie.png",
-	-- Book cover.
-	"materials/aneurism_hud/book_cover.vmt",
-	"materials/aneurism_hud/book_cover.png",
 	-- Procedural surfaces (paper / plastic / metal).
 	"materials/aneurism_hud/paper.vmt",
 	"materials/aneurism_hud/paper.png",

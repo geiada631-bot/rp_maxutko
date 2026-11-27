@@ -37,7 +37,6 @@
 | `lua/autorun/aniv_hud_resources.lua` | Только SERVER: `resource.AddFile()` — **30 файлов** (PNG/VMT/TTF) |
 | `lua/autorun/client/aniv_hud_core.lua` | Отрисовка: рация + LCD, книга, **2 полосы BLOOD/AIR**, legacy-4-иконки, подсказки, рамка чата, CRT. Экспортирует `ANIV.GetWidgetRects()`, `ANIV.GetRadioChatRect()`, `ANIV.GetBarRects()` |
 | `lua/autorun/client/aniv_hud_input.lua` | Ввод: F3/X/Q/E/TAB, клики, `DTextEntry` чата, перехват `PlayerSay`, курсор |
-| `lua/autorun/client/aniv_hud_inventory.lua` | VGUI-инвентарь 4×4 (`ANIV_Inventory`) |
 | `materials/aneurism_hud/walkie_talkie.png` | Спрайт рации 371×413, вики `File:Walkie_talkie_(1).png` |
 | `materials/aneurism_hud/bar_frame.png`, `bar_noise.png` | Настоящие полосы: капсула 265×39 и шум 128×32 из `docs/refs/hud_bars_reference.png` |
 | `materials/aneurism_hud/ui_button_bg.png`, `ui_panel.png` | Настоящие UI-спрайты из `data.unity3d`: кнопка 352×48 и фон 640×576 |
@@ -62,7 +61,7 @@
    без панели, заголовка, "`ДЕЙСТВИЕ`" и подсказок. Одно действие = одна кнопка.
    Надпись не должна выходить за кнопку (авто-подбор шрифта 17→9 и `...`).
    Логика/клавиши не менялись. Код меню — в другом репозитории.
-3. **VGUI-инвентарь удалён полностью.** Файла `aniv_hud_inventory.lua` больше нет, панель `INVENTORY` не открывается ни `C`, ни `Q`, ни кликом по книге. Книга — только счётчик. `ANIV.OpenInventory/CloseInventory/ToggleInventory` — пустые заглушки для совместимости. Конвара `aniv_hud_inventory_key` больше нет.
+3. **Инвентарь и книжка-счётчик вырезаны полностью.** Нет файла `aniv_hud_inventory.lua`, нет панели `INVENTORY`, нет книжки с Ψ под рацией, нет состояния `inventory`, нет `ANIV_SetInventory`, нет хуков `ANIV_InventoryChanged`/`ANIV_ItemDropped`, мост больше не подаёт предметы. Старые API-функции инвентаря — пустые заглушки для совместимости. Конвара `aniv_hud_inventory_key` больше нет.
 4. **Фракционная рация:** выключена при старте; `F3` разблокирует курсор;
    клик по рации включает её; `X` открывает фракционный чат; второй клик
    возвращает обычный чат.
@@ -136,14 +135,14 @@
 `ANIV.SetStat/GetStat`, `SetBlood/SetAir/SetSanity/SetMoisture/SetNourishment/SetSepsis`,
 `SetRadioActive/ToggleRadio/IsRadioActive`, `SetRadioChatOpen/IsRadioChatOpen`,
 `ToggleCursorUnlocked/IsCursorUnlocked`, `SetMuted/ToggleMute` (алиас: `muted == not radioActive`),
-`SetBroadcasting`, `SetInventory/AddItem/RemoveItem/InventoryCount`, `ToggleHUD`,
+`SetBroadcasting`, `ToggleHUD` (старые функции инвентаря — пустые заглушки),
 `MatReady/RefreshMaterials`, `DrawTex/DrawTexTiled/DrawTexUV/DrawIcon`,
 `GetWidgetRects/GetRadioChatRect/GetBarRects`.
 
 Хуки: `ANIV_StatChanged`, `ANIV_RadioStateChanged`, `ANIV_RadioChatStateChanged`,
-`ANIV_CursorUnlockedChanged`, `ANIV_MuteChanged`, `ANIV_InventoryChanged`,
+`ANIV_CursorUnlockedChanged`, `ANIV_MuteChanged`,
 `ANIV_Interact`, `ANIV_ItemDropped`, `ANIV_RadioMessageReceived`,
-`ANIV_HUDVisibilityChanged`, `ANIV_InventoryOpened/Closed`.
+`ANIV_HUDVisibilityChanged`.
 
 ---
 

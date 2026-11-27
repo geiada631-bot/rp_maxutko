@@ -42,12 +42,10 @@ ANIV.State = {
 	-- unlocks the cursor (F3) and clicks the radio body.
 	radioActive  = false,
 	radioChatOpen = false,
-	cursorUnlocked = false, -- toggled with F3, independent of TAB/inventory
+	cursorUnlocked = false, -- toggled with F3, independent of TAB
 	muted        = true,   -- kept in sync: muted == not radioActive
 	broadcasting = false,
-	uiMode       = false,  -- cursor is visible (F3 / TAB / inventory / chat)
-	inventoryOpen = false,
-	inventory    = {},     -- array of item names, e.g. {"Ration", "Pipe"}
+	uiMode       = false,  -- cursor is visible (F3 / TAB / chat)
 	-- Six HUD bars from ANEURISM IV: blood/air/moisture/nourishment/sanity/sepsis.
 	-- bone/leg are kept for the legacy four-icon HUD (aniv_hud_bars_enabled 0).
 	stats        = {
@@ -59,7 +57,6 @@ ANIV.State = {
 if SERVER then
 	util.AddNetworkString("ANIV_SetStat")
 	util.AddNetworkString("ANIV_SetStats")
-	util.AddNetworkString("ANIV_SetInventory")
 	util.AddNetworkString("ANIV_SetMuted")
 	util.AddNetworkString("ANIV_RadioChat")
 	util.AddNetworkString("ANIV_RadioChatReceive")
@@ -171,7 +168,6 @@ if CLIENT then
 	ANIV.MAT.paper  = M("paper")
 	ANIV.MAT.plastic= M("plastic")
 	ANIV.MAT.metal  = M("metal")
-	ANIV.MAT.book   = M("book_cover")
 	ANIV.MAT.barNoise = M("bar_noise") -- speckled fill, tinted per stat
 	ANIV.MAT.barFrame = M("bar_frame") -- original worn capsule from the game sprite
 
@@ -189,7 +185,6 @@ if CLIENT then
 	-- compute tiling so 1 texture pixel maps to exactly 1 output pixel.
 	ANIV.TEX = {
 		radio   = { w = 371, h = 413 }, -- File:Walkie talkie (1).png, 371x413
-		book    = { w = 256, h = 320 },
 		paper   = { w = 128, h = 128 },
 		plastic = { w = 128, h = 128 },
 		metal   = { w = 128, h = 128 },
@@ -215,8 +210,7 @@ if CLIENT then
 	}
 
 	-- If a generated texture is missing, fall back to the next best one.
-	if ANIV.MAT.book:IsError()   then ANIV.MAT.book    = ANIV.MAT.paper   end
-	if ANIV.MAT.paper:IsError()  then ANIV.MAT.paper   = ANIV.MAT.book    end
+	if ANIV.MAT.paper:IsError()  then ANIV.MAT.paper   = ANIV.MAT.metal   end
 	if ANIV.MAT.plastic:IsError()then ANIV.MAT.plastic = ANIV.MAT.metal   end
 	if ANIV.MAT.metal:IsError()  then ANIV.MAT.metal   = ANIV.MAT.plastic end
 
@@ -467,42 +461,19 @@ if CLIENT then
 	end
 	function ANIV.IsCursorUnlocked() return ANIV.State.cursorUnlocked end
 
-	function ANIV.SetInventory(list)
-		ANIV.State.inventory = {}
-		if istable(list) then
-			for _, v in pairs(list) do
-				ANIV.State.inventory[#ANIV.State.inventory + 1] = tostring(v)
-			end
-		end
-		hook.Run("ANIV_InventoryChanged", ANIV.State.inventory)
-	end
-
-	function ANIV.AddItem(name)
-		ANIV.State.inventory[#ANIV.State.inventory + 1] = tostring(name)
-		hook.Run("ANIV_InventoryChanged", ANIV.State.inventory)
-	end
-
-	function ANIV.RemoveItem(index)
-		if ANIV.State.inventory[index] then
-			table.remove(ANIV.State.inventory, index)
-			hook.Run("ANIV_InventoryChanged", ANIV.State.inventory)
-		end
-	end
-
-	function ANIV.InventoryCount() return #ANIV.State.inventory end
-
-	-- The VGUI inventory panel was removed entirely by user request. Keep these
-	-- as no-ops so gamemode code calling the old API never throws. The book icon
-	-- remains only as a decorative item counter.
+	-- The whole inventory subsystem (VGUI panel, book counter, item list,
+	-- net sync and hooks) was removed by user request. These are empty stubs
+	-- kept only so gamemode code calling the old API never throws.
+	function ANIV.SetInventory(list) end
+	function ANIV.AddItem(name) end
+	function ANIV.RemoveItem(index) end
+	function ANIV.InventoryCount() return 0 end
 	function ANIV.OpenInventory() end
-	function ANIV.CloseInventory() ANIV.State.inventoryOpen = false end
+	function ANIV.CloseInventory() end
 	function ANIV.ToggleInventory() end
 
 	function ANIV.ToggleHUD()
 		ANIV.State.hudVisible = not ANIV.State.hudVisible
-		if not ANIV.State.hudVisible and ANIV.CloseInventory then
-			ANIV.CloseInventory()
-		end
 		hook.Run("ANIV_HUDVisibilityChanged", ANIV.State.hudVisible)
 	end
 
@@ -522,7 +493,6 @@ if CLIENT then
 		ANIV.SetRadioActive(false)
 		ANIV.State.cursorUnlocked = false
 		ANIV.SetBroadcasting(false)
-		ANIV.SetInventory({})
 		for k in pairs(ANIV.State.stats) do ANIV.SetStat(k, 100) end
 	end)
 
@@ -533,9 +503,6 @@ if CLIENT then
 	net.Receive("ANIV_SetStats", function()
 		local t = net.ReadTable()
 		for k, v in pairs(t) do ANIV.SetStat(k, v) end
-	end)
-	net.Receive("ANIV_SetInventory", function()
-		ANIV.SetInventory(net.ReadTable())
 	end)
 	net.Receive("ANIV_SetMuted", function()
 		ANIV.SetMuted(net.ReadBool())
@@ -567,7 +534,6 @@ if CLIENT then
 			" radioChat=", ANIV.State.radioChatOpen,
 			" cursorUnlocked=", ANIV.State.cursorUnlocked,
 			" broadcasting=", ANIV.State.broadcasting,
-			" items=", ANIV.InventoryCount(),
 			" scale=", ANIV.Scale())
 		for k, v in pairs(ANIV.State.stats) do print("  ", k, v) end
 	end)
@@ -577,7 +543,7 @@ if CLIENT then
 	-- files (check the server console for "[ANIV][SERVER] Added client download").
 	concommand.Add("aniv_hud_materials", function()
 		ANIV.RefreshMaterials()
-		for _, key in ipairs({ "radio", "book", "paper", "plastic", "metal",
+		for _, key in ipairs({ "radio", "paper", "plastic", "metal", "barFrame", "barNoise",
 			"icon_blood", "icon_bone", "icon_leg", "icon_skull", "icon_check", "icon_eye" }) do
 			local m = ANIV.MAT[key]
 			local tex = m and m:GetTexture("$basetexture")
@@ -586,7 +552,7 @@ if CLIENT then
 				key, tostring(ANIV.MatReady(m)), name))
 		end
 		print("[ANIV HUD] native sizes: radio=" .. ANIV.TEX.radio.w .. "x" .. ANIV.TEX.radio.h
-			.. " book=" .. ANIV.TEX.book.w .. "x" .. ANIV.TEX.book.h)
+			.. " bar_frame=" .. ANIV.TEX.bar_frame.w .. "x" .. ANIV.TEX.bar_frame.h)
 	end)
 
 end -- CLIENT

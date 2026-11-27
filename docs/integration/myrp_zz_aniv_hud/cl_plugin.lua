@@ -4,7 +4,7 @@
  1. Suppresses the legacy "MYRP.CustomHUD.Paint" hook (bottom-left glass panel
     and ammo panel) so only the Aneurism IV HUD is visible.
  2. Feeds the HUD from live Helix state: health -> blood, "stm" -> air/leg,
-    character "sanity" -> sanity, and the character inventory -> book counter.
+    character "sanity" -> sanity. Inventory/book UI was removed by request.
 
  The legacy plugin's other hooks (ShouldHideBars, CanDrawAmmoHUD, HUDShouldDraw)
  are intentionally left in place - they hide Helix/Source HUD panels that our
@@ -69,17 +69,6 @@ local function Install()
         ANIV.SetStat("nourishment", math.Clamp(nourishment, 0, 100))
         ANIV.SetStat("sepsis", math.Clamp(sepsis, 0, 100))
 
-        -- Inventory book counter: real Helix inventory items.
-        local inventory = character:GetInventory()
-        if (inventory and istable(inventory.items)) then
-            local names = {}
-            for _, item in pairs(inventory.items) do
-                if (#names >= 16) then break end
-                local name = item.GetName and item:GetName() or item.name or item.uniqueID or "ITEM"
-                names[#names + 1] = tostring(name)
-            end
-            ANIV.SetInventory(names)
-        end
     end)
 
     Log("installed; legacy HUD painter suppressed, Helix state -> ANIV HUD.")

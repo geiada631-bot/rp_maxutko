@@ -2,7 +2,7 @@
  ANEURISM IV HUD - input / interaction
  File: lua/autorun/client/aniv_hud_input.lua
 
- Handles: broadcast key, cursor visibility, clicking the radio and the book,
+ Handles: broadcast key, cursor visibility and clicking the radio,
  and the context "Grab" / "Search" interaction (E by default).
 ---------------------------------------------------------------------------]]
 
@@ -89,8 +89,7 @@ hook.Add("ANIV_RadioStateChanged", "ANIV_HUD_RadioNotice", function(active)
 end)
 
 function ANIV.UpdateCursor()
-	local want = ANIV.State.inventoryOpen
-		or ANIV.State.cursorUnlocked
+	local want = ANIV.State.cursorUnlocked
 		or ANIV.State.radioChatOpen
 		or input.IsKeyDown(ANIV.Key(GetConVar("aniv_hud_ui_key"):GetString()))
 		or GetConVar("aniv_hud_free_cursor"):GetBool()
@@ -106,7 +105,7 @@ end
 hook.Add("Think", "ANIV_HUD_Think", function()
 	if not IsValid(LocalPlayer()) then return end
 
-	-- Keep the clicker state in sync with F3 / TAB / inventory / chat.
+	-- Keep the clicker state in sync with F3 / TAB / chat.
 	ANIV.UpdateCursor()
 
 	-- While typing into the radio, let the text entry own the keyboard.
@@ -172,7 +171,6 @@ hook.Add("GUIMousePressed", "ANIV_HUD_Click", function(code)
 		return true
 	end
 
-	-- The book icon is decorative now: clicking it does not open any menu.
 end)
 
 ---------------------------------------------------------------------------
@@ -189,8 +187,6 @@ function ANIV.Interact()
 	if not IsValid(ent) then return end
 
 	if prompt == "Grab" then
-		local name = ent.ANIV_ItemName or ent:GetClass()
-		ANIV.AddItem(name)
 		surface.PlaySound("items/ammo_pickup.wav")
 		-- Only remove entities explicitly marked by your gamemode.
 		if ent.ANIV_RemoveOnGrab == true then ent:Remove() end

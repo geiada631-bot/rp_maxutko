@@ -2,7 +2,7 @@
  ANEURISM IV HUD - rendering
  File: lua/autorun/client/aniv_hud_core.lua
 
- Draw order: radio -> book -> status icons -> context prompts -> CRT overlay.
+ Draw order: radio -> stat bars (or legacy icons) -> context prompts -> CRT overlay.
  All coordinates are derived from ANIV.Scale() so the layout stays proportional
  from 720p to 4K. Layout rects are exported for the input module.
 ---------------------------------------------------------------------------]]
@@ -99,8 +99,6 @@ function ANIV.GetWidgetRects()
 	local S = ANIV.S()
 	local rw, rh = 250 * S, 278 * S
 	local rx, ry = 22 * S, 16 * S
-	local bw, bh = 126 * S, 158 * S
-	local bx, by = rx + 56 * S, ry + rh + 10 * S
 
 	local is = 44 * S
 	local gap = 12 * S
@@ -110,7 +108,6 @@ function ANIV.GetWidgetRects()
 
 	return {
 		radio = { x = rx, y = ry, w = rw, h = rh },
-		book  = { x = bx, y = by, w = bw, h = bh },
 		icons = { x = ix, y = iy, size = is, gap = gap },
 	}
 end
@@ -207,45 +204,7 @@ local function DrawRadio(S)
 	end
 end
 
----------------------------------------------------------------------------
--- Inventory book (under the radio)
----------------------------------------------------------------------------
-local function DrawBookSymbol(cx, cy, sz, col)
-	local t = math.max(1.5, sz * 0.075)
-	-- stem + crossbar: the "Ψ with an extra line" from the reference
-	ANIV.ThickLine(cx, cy - sz * 0.42, cx, cy + sz * 0.42, t, col)
-	ANIV.ThickLine(cx - sz * 0.34, cy - sz * 0.16, cx + sz * 0.34, cy - sz * 0.16, t, col)
-	-- three prongs
-	ANIV.ThickLine(cx - sz * 0.34, cy - sz * 0.16, cx - sz * 0.46, cy - sz * 0.40, t, col)
-	ANIV.ThickLine(cx, cy - sz * 0.28, cx, cy - sz * 0.46, t, col)
-	ANIV.ThickLine(cx + sz * 0.34, cy - sz * 0.16, cx + sz * 0.46, cy - sz * 0.40, t, col)
-end
-
-local function DrawBook(S)
-	local r = ANIV.GetWidgetRects().book
-	local x, y, w, h = r.x, r.y, r.w, r.h
-	-- gui.MousePos() returns two values; assign them first (passing the call
-	-- inline would truncate it to one and leave InRect's h nil).
-	local mx, my = gui.MousePos()
-	local hover = ANIV.InRect(mx, my, x, y, w, h) and (ANIV.State.uiMode or ANIV.State.inventoryOpen)
-
-	ANIV.DrawTex(ANIV.MAT.book, x, y, w, h, Color(74, 64, 48, 255))
-
-	-- worn dark frame
-	surface.SetDrawColor(58, 50, 38, 180)
-	surface.DrawOutlinedRect(x, y, w, h, math.max(1, 2 * S))
-
-	if hover then
-		surface.SetDrawColor(ANIV.COL.green)
-		surface.DrawOutlinedRect(x - 2, y - 2, w + 4, h + 4, math.max(1, 2 * S))
-	end
-
-	DrawBookSymbol(x + w * 0.5, y + h * 0.46, w * 0.52, Color(38, 32, 24, 235))
-
-	-- counter at the bottom, centered
-	ANIV.Text(tostring(ANIV.InventoryCount()), x + w * 0.5, y + h - 26 * S,
-		17 * S, Color(42, 34, 22), TEXT_ALIGN_CENTER, nil, false, 0)
-end
+-- The book/counter HUD element was removed entirely by user request.
 
 ---------------------------------------------------------------------------
 -- Status icons (bottom, slightly left of center)
@@ -488,7 +447,6 @@ hook.Add("HUDPaint", "ANIV_HUD_Paint", function()
 
 	local S = ANIV.Scale()
 	DrawRadio(S)
-	DrawBook(S)
 	if GetConVar("aniv_hud_bars_enabled"):GetBool() then
 		DrawStatBars(S)
 	else

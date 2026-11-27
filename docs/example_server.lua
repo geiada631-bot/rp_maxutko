@@ -6,7 +6,6 @@
 
 util.AddNetworkString("ANIV_SetStat")
 util.AddNetworkString("ANIV_SetStats")
-util.AddNetworkString("ANIV_SetInventory")
 util.AddNetworkString("ANIV_SetMuted")
 
 local function SendStats(ply)
