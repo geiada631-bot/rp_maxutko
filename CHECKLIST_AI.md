@@ -1,205 +1,231 @@
-# CHECKLIST ДЛЯ ДРУГОЙ НЕЙРОНКИ — ANEURISM IV HUD (GMod)
+# ЧЕКЛИСТ ДЛЯ ДРУГОЙ НЕЙРОНКИ — ANEURISM IV HUD (Garry's Mod)
 
-Прочитай этот файл **целиком** перед любыми правками. Он описывает, что уже сделано,
-почему сделано именно так, и какие ошибки нельзя повторить. Язык ответов пользователя — русский.
-
----
-
-## 0. Кратко: что это за репозиторий
-
-Это **самостоятельный аддон Garry's Mod**, который воссоздаёт HUD игры
-**ANEURISM IV** (Vellocet Software) и добавляет **фракционную рацию**.
-
-- Версия: **1.1.0**
-- Корень репозитория = содержимое папки аддона. То есть чтобы поставить,
-  нужно скопировать **весь этот репозиторий** в
-  `<GMod>/garrysmod/addons/aneurism_hud/` (внутри останутся `lua/`, `materials/`, `resource/`).
-- Две рабочие копии серверов пользователя:
-  - `D:\steamcmd\Server\garrysmod\addons\aneurism_hud`
-  - `D:\steamcmd2\Server\garrysmod\addons\aneurism_hud`
-- Оба сервера используют гейммод `myrp` (на базе Helix), карта `rp_industrial17_exceed`.
-- Мост к Helix лежит в `docs/integration/myrp_zz_aniv_hud/` — **это справочная копия**,
-  не часть аддона. В бою он должен лежать в
-  `<GMod>/garrysmod/gamemodes/myrp/schema/plugins/myrp_zz_aniv_hud/`.
+> Прочитай файл целиком **до** любой правки. Здесь зафиксировано, что уже сделано,
+> почему сделано именно так, какие ошибки исправлены и как всё проверить.
+> Пользователь говорит по-русски — отвечай по-русски.
 
 ---
 
-## 1. Карта файлов и кто за что отвечает
+## 0. Что это за репозиторий
 
-| Файл | Роль |
+Самостоятельный аддон GMod, который воссоздаёт HUD игры **ANEURISM IV**
+(Vellocet Software) и добавляет **фракционную рацию**. Версия **1.1.0**.
+
+**Корень репозитория = содержимое папки аддона.** Installing:
+скопируй весь этот репозиторий в `<GMod>/garrysmod/addons/aneurism_hud/`
+(внутри останутся `lua/`, `materials/`, `resource/`, `docs/`, `tools/`).
+
+Рабочие копии на машине пользователя:
+- `D:\steamcmd\Server\garrysmod\addons\aneurism_hud`
+- `D:\steamcmd2\Server\garrysmod\addons\aneurism_hud`
+
+Гейммод: `myrp` (на базе Helix), карта `rp_industrial17_exceed`.
+Мост к Helix лежит в `docs/integration/myrp_zz_aniv_hud/` — **справка**, не часть аддона;
+в бою он должен быть в `<GMod>/garrysmod/gamemodes/myrp/schema/plugins/myrp_zz_aniv_hud/`.
+
+**Чего в этом репозитории НЕТ:** меню взаимодействия `myrp_weapon_interaction`.
+Оно живёт в другом репозитории `suda-moi-proecti` (исходники сервера). Здесь только
+текстуры `ui_button_bg.png` / `ui_panel.png`, которые оно использует.
+
+---
+
+## 1. Карта файлов
+
+| Файл | Ответственность |
 |---|---|
-| `lua/autorun/aniv_hud_init.lua` | Общий bootstrap: конвары, палитра, состояние, шрифты, материалы, 1:1-хелперы, публичный API, **серверная маршрутизация рации**, конкоманды |
-| `lua/autorun/aniv_hud_resources.lua` | Только SERVER: `resource.AddFile()` для 24 файлов (PNG/VMT/TTF) |
-| `lua/autorun/client/aniv_hud_core.lua` | Отрисовка: рация + LCD, книга, **6 полос статов**, legacy-4-иконки, подсказки, рамка чата, CRT. Экспортирует `ANIV.GetWidgetRects()`, `ANIV.GetRadioChatRect()`, `ANIV.GetBarRects()` |
-| `lua/autorun/client/aniv_hud_input.lua` | Ввод: F3/X/Q/E/TAB, клики по виджетам, `DTextEntry` чата, перехват `PlayerSay`, курсор |
-| `lua/autorun/client/aniv_hud_inventory.lua` | VGUI-панель инвентаря 4×4 (`ANIV_Inventory`) |
-| `materials/aneurism_hud/*.png|vmt` | Спрайт рации 371×413 (с вики), обложка книги, бумага/пластик/металл, иконки |
-| `resource/fonts/*.ttf` | Silkscreen (пиксельный), VT323 (LCD), обе OFL |
-| `docs/refs/measurements.json` | **Все измерения в пикселях + UV + hex-цвета. Не выдумывай числа — бери отсюда** |
-| `docs/PROMPT_ANEURISM_IV_UI.md` | Очень подробный промт/спецификация (410+ строк). Главный источник истины по ТЗ |
-| `docs/integration/myrp_zz_aniv_hud/` | Мост к Helix (справка): снимает старый HUD и кормит ANIV живыми данными |
-| `tools/generate_textures.ps1`, `tools/prepare_icons.py` | Генерация текстур/иконок заново |
+| `lua/autorun/aniv_hud_init.lua` | Конвары, палитра, состояние, шрифты, материалы, хелперы 1:1, публичный API, **серверная маршрутизация рации**, конкоманды |
+| `lua/autorun/aniv_hud_resources.lua` | Только SERVER: `resource.AddFile()` — **30 файлов** (PNG/VMT/TTF) |
+| `lua/autorun/client/aniv_hud_core.lua` | Отрисовка: рация + LCD, книга, **2 полосы BLOOD/AIR**, legacy-4-иконки, подсказки, рамка чата, CRT. Экспортирует `ANIV.GetWidgetRects()`, `ANIV.GetRadioChatRect()`, `ANIV.GetBarRects()` |
+| `lua/autorun/client/aniv_hud_input.lua` | Ввод: F3/X/Q/E/TAB, клики, `DTextEntry` чата, перехват `PlayerSay`, курсор |
+| `lua/autorun/client/aniv_hud_inventory.lua` | VGUI-инвентарь 4×4 (`ANIV_Inventory`) |
+| `materials/aneurism_hud/walkie_talkie.png` | Спрайт рации 371×413, вики `File:Walkie_talkie_(1).png` |
+| `materials/aneurism_hud/bar_frame.png`, `bar_noise.png` | Настоящие полосы: капсула 265×39 и шум 128×32 из `docs/refs/hud_bars_reference.png` |
+| `materials/aneurism_hud/ui_button_bg.png`, `ui_panel.png` | Настоящие UI-спрайты из `data.unity3d`: кнопка 352×48 и фон 640×576 |
+| `materials/aneurism_hud/icon_*.png` | Оригинальные иконки капли/черепа/глаза/галочки и game-icons.net кость/нога |
+| `resource/fonts/*.ttf` | Silkscreen (пиксель), VT323 (LCD), лицензия OFL |
+| `docs/refs/measurements.json` | Все измерения, UV и hex-цвета. **Не выдумывай числа — бери отсюда** |
+| `docs/PROMPT_ANEURISM_IV_UI.md` | Полная спецификация (400+ строк), главный источник ТЗ |
+| `docs/integration/myrp_zz_aniv_hud/` | Справочная копия моста к Helix |
+| `tools/generate_textures.ps1` | Paper/plastic/metal/book_cover (детерминированный сид) |
+| `tools/prepare_icons.py` | Пересборка иконок |
+| `tools/make_bar_textures.py` | Вырезает `bar_frame.png`/`bar_noise.png` из референса |
+| `tools/extract_unity_ui.py` | Извлекает `ui_button_bg.png`/`ui_panel.png`/`icon_check.png` из `data.unity3d` (UnityPy) |
 
 ---
 
-## 2. Состояние рации (конечный автомат) — не упрощать до mute!
+## 2. Что именно просил пользователь (последние решения)
 
-Изначально: `radioActive=false`, `radioChatOpen=false`, `cursorUnlocked=false`,
-`muted=true`. Обычный чат работает.
+1. **HUD здоровья/энергии:** только `BLOOD` и `AIR` (= stamina). Остальные полосы
+   (moisture/nourishment/sanity/sepsis) убраны по прямой просьбе. Старые 4 иконки
+   доступны через `aniv_hud_bars_enabled 0`, но по умолчанию НЕ рисуются.
+2. **Меню взаимодействия:** оформление под Aneurism IV, **только кнопки** —
+   без панели, заголовка, "`ДЕЙСТВИЕ`" и подсказок. Одно действие = одна кнопка.
+   Надпись не должна выходить за кнопку (авто-подбор шрифта 17→9 и `...`).
+   Логика/клавиши не менялись. Код меню — в другом репозитории.
+3. **Фракционная рация:** выключена при старте; `F3` разблокирует курсор;
+   клик по рации включает её; `X` открывает фракционный чат; второй клик
+   возвращает обычный чат.
 
-| Действие | Переход | LCD (4 строки, тот же шрифт/позиция/цвет) |
+---
+
+## 3. Визуальная спецификация (не менять «на глаз»)
+
+- Референс 1920×1080. `S = clamp(ScrH()/1080, 0.55, 1.65) * aniv_hud_scale`.
+- Всё в целых пикселях через `ANIV.Snap()`. UV явный, `noclamp` + `$pointsample`.
+- **Радио:** `x=22*S, y=16*S, w=250*S, h≈278*S`; LCD UV из measurements.json
+  (371×413: `u0=93/371, v0=254/413, u1=233/371, v1=340/413`).
+- **Книга:** `x=radio.x+56*S`, `y=radio.y+radio.h+10*S`, `126×158`, символ Ψ.
+- **Полосы:** капсула `265×39`, interior `x20/y8/w225/h23`, gap `8`,
+  ряд по центру внизу `y=ScrH()-39*S-30*S`. Фон — `bar_frame.png`,
+  заливка — `bar_noise.png` с tint `#C42C24` (blood) / `#3460E2` (air),
+  ширина `iw*value/100`; незаполненное — серый шум. Текст `BLOOD`/`AIR`
+  заглавными, Silkscreen `15*S`, белый `#EEEEE6`, обводка 1px.
+- **Подсказки Grab/Search:** `y=0.57*ScrH`, иконки + 7px + текст.
+- **CRT:** скан-линии каждые 2–3px, alpha 10–20, виньетка, конвар `aniv_hud_crt`.
+- Никогда не показывать розово-чёрный чекербоард — fallback на плоский цвет.
+
+---
+
+## 4. Рация: конечный автомат
+
+Старт: `radioActive=false`, `radioChatOpen=false`, `cursorUnlocked=false`, `muted=true`.
+
+| Действие | Переход | LCD (4 строки) |
 |---|---|---|
 | Старт | OFF | `MUTED.` / `Click to turn on.` / `F3: unlock cursor` / `Local chat active.` |
-| `F3` | разблокирует курсор (toggle) | без изменений |
-| Клик по корпусу рации | → ON, `muted=false` | `UNMUTED.` / `Click to turn off.` / `Press X to talk.` / `Faction channel.` |
-| `X` при ON | открыть инпут | `BROADCASTING` / `Type your message.` / `Enter to send.` / `Esc to cancel.` + мигающая красная точка |
-| `Enter` | отправить по сети, закрыть инпут | → ON |
-| `Esc` | закрыть инпут, **рацию НЕ выключать** | → ON |
-| Повторный клик | → OFF, обычный чат снова работает | → START |
+| `F3` | toggle курсора | без изменений |
+| Клик по корпусу | ON | `UNMUTED.` / `Click to turn off.` / `Press X to talk.` / `Faction channel.` |
+| `X` при ON | ввод | `BROADCASTING` / `Type your message.` / `Enter to send.` / `Esc to cancel.` + красная точка |
+| `Enter` | отправить, закрыть ввод | ON |
+| `Esc` | закрыть ввод, **НЕ выключать рацию** | ON |
+| Повторный клик | OFF, обычный чат вернулся | START |
 
-Пока рация ON, клиентский хук `PlayerSay` возвращает `""` и открывает инпут
-с набранным текстом — обычный чат недоступен. Вернуть его можно **только** кликом по рации.
+Пока рация ON, клиентский `PlayerSay` возвращает `""` и открывает инпут с текстом.
+Обычный чат возвращается **только** кликом по рации.
 
 ---
 
-## 3. Управление и конвары (все — `CreateClientConVar`,=TRUE,FALSE)
+## 5. Конвары и команды
 
 | Конвар | Дефолт | Назначение |
 |---|---|---|
-| `aniv_hud_radio_key` | `F3` | toggle курсора для клика по рации |
-| `aniv_hud_radio_chat_key` | `X` | открыть фракционный чат, когда рация ON |
-| `aniv_hud_broadcast_key` | `C` | hold-индикатор передачи (визуальный; в игре X — голос) |
-| `aniv_hud_faction_chat` | `1` | отправка в серверный фракционный канал |
-| `aniv_hud_ui_key` | `TAB` | временный курсор (удержание), как в игре |
-| `aniv_hud_inventory_key` | `Q` | книга/инвентарь |
+| `aniv_hud_radio_key` | `F3` | toggle курсора |
+| `aniv_hud_radio_chat_key` | `X` | фракционный чат при ON |
+| `aniv_hud_broadcast_key` | `C` | визуальный hold-индикатор |
+| `aniv_hud_faction_chat` | `1` | отправка в серверный канал |
+| `aniv_hud_ui_key` | `TAB` | временный курсор |
+| `aniv_hud_inventory_key` | `Q` | книга |
 | `aniv_hud_interact_key` | `E` | Grab/Search |
 | `aniv_hud_free_cursor` | `0` | постоянный курсор (тест) |
 | `aniv_hud_ads_click` | `0` | курсор при прицеливании |
-| `aniv_hud_prompt_preview` | `0` | показать обе подсказки сразу |
+| `aniv_hud_prompt_preview` | `0` | обе подсказки сразу |
 | `aniv_hud_prompt_dist` | `110` | дальность подсказок |
-| `aniv_hud_icon_labels` | `0` | подписи под иконками |
+| `aniv_hud_icon_labels` | `0` | подписи legacy-иконок |
+| `aniv_hud_bars_enabled` | `1` | 2 полосы ↔ 4 иконки |
 | `aniv_hud_scale` | `1` | масштаб от 1080p |
-| `aniv_hud_crt` | `1` | скан-линии/виньетка |
+| `aniv_hud_crt` | `1` | CRT |
 | `aniv_hud_enabled` | `1` | общий флаг |
 
-Команды: `togglehud`, `aniv_hud_toggle`, `aniv_hud_radio on|off` (без аргумента — toggle),
-`aniv_hud_reset`, `aniv_hud_debug`, `aniv_hud_materials`, `myrp_aniv_hud_status` (из моста).
+Команды: `togglehud`, `aniv_hud_toggle`, `aniv_hud_radio on|off`,
+`aniv_hud_reset`, `aniv_hud_debug`, `aniv_hud_materials`, `myrp_aniv_hud_status`.
 
 ---
 
-## 4. Публичный API и хуки (не ломай совместимость)
+## 6. Публичный API и хуки (не ломать)
 
-`ANIV.SetStat/GetStat`, `SetBlood/SetAir/SetSanity`,
-`SetRadioActive/ToggleRadio/IsRadioActive`,
-`SetRadioChatOpen/IsRadioChatOpen`, `ToggleCursorUnlocked/IsCursorUnlocked`,
-`SetMuted/ToggleMute` (**алиас**: `muted == not radioActive`),
-`SetBroadcasting`, `SetInventory/AddItem/RemoveItem/InventoryCount`, `ToggleHUD`.
+`ANIV.SetStat/GetStat`, `SetBlood/SetAir/SetSanity/SetMoisture/SetNourishment/SetSepsis`,
+`SetRadioActive/ToggleRadio/IsRadioActive`, `SetRadioChatOpen/IsRadioChatOpen`,
+`ToggleCursorUnlocked/IsCursorUnlocked`, `SetMuted/ToggleMute` (алиас: `muted == not radioActive`),
+`SetBroadcasting`, `SetInventory/AddItem/RemoveItem/InventoryCount`, `ToggleHUD`,
+`MatReady/RefreshMaterials`, `DrawTex/DrawTexTiled/DrawTexUV/DrawIcon`,
+`GetWidgetRects/GetRadioChatRect/GetBarRects`.
 
 Хуки: `ANIV_StatChanged`, `ANIV_RadioStateChanged`, `ANIV_RadioChatStateChanged`,
 `ANIV_CursorUnlockedChanged`, `ANIV_MuteChanged`, `ANIV_InventoryChanged`,
 `ANIV_Interact`, `ANIV_ItemDropped`, `ANIV_RadioMessageReceived`,
 `ANIV_HUDVisibilityChanged`, `ANIV_InventoryOpened/Closed`.
 
-Хелперы отрисовки: `ANIV.Scale/S`, `Snap`, `Font`, `Text`, `InRect`, `Key`,
-`ThickLine`, `MatReady`, `RefreshMaterials`, `DrawTex`, `DrawTexTiled`,
-`DrawTexUV`, `DrawIcon`, `GetWidgetRects`, `GetRadioChatRect`.
-
 ---
 
-## 5. Сетевой протокол рации (сервер авторитетен)
+## 7. Сеть рации (сервер авторитетен)
 
 - `ANIV_RadioChat`: клиент → сервер, только `net.WriteString(text)`.
-- Сервер: trim, макс. 160 символов, anti-spam 0.5 c (`ply.ANIVLastRadio`),
-  фракция = `ply:GetCharacter():GetFaction()` (fallback `ply:Team()`),
-  получатели = все с тем же индексом (`ix.faction.indices[index]`), `net.Send(recipients)`.
-  Лог: `[ANIV][RADIO] <ник> [uid]: <текст>`.
-- `ANIV_RadioChatReceive`: сервер → клиенты:
-  `WriteEntity(sender)`, `WriteString(uid)`, `WriteString(name)`,
-  `WriteUInt(r,8)`, `WriteUInt(g,8)`, `WriteUInt(b,8)`, `WriteString(text)`.
-- Клиент печатает `chat.AddText` с зелёным префиксом `[RADIO · NAME]`, проигрывает
-  `buttons/blip1.wav`, дёргает хук `ANIV_RadioMessageReceived`.
-- `combine` не слышит `resistance` — это прямо из вики (Cortex/Scum разные каналы).
+- Сервер: trim, ≤160 символов, anti-spam 0.5 c, фракция =
+  `ply:GetCharacter():GetFaction()` (fallback `Team()`), получатели — те же
+  `ix.faction.indices[index]`, лог `[ANIV][RADIO] <ник> [uid]: <текст>`.
+- `ANIV_RadioChatReceive`: `WriteEntity`, `uid`, `name`, `r/g/b` как `WriteUInt(8)`, `text`.
+- Клиент: `chat.AddText` с префиксом `[RADIO · NAME]`, звук `buttons/blip1.wav`,
+  хук `ANIV_RadioMessageReceived`.
+- `combine` не слышит `resistance` (как Cortex/Scum в вики).
 
 ---
 
-## 6. Правила 1:1 (не нарушать)
+## 8. Откуда текстуры и как их пересоздать
 
-- Референс 1920×1080; `S = clamp(ScrH()/1080, 0.55, 1.65) * aniv_hud_scale`.
-- Все координаты/размеры — целые пиксели через `ANIV.Snap()`.
-- Пропорции спрайтов сохранять; TextureUV только явный; `noclamp` + `$pointsample`.
-- Радио: `x=22*S, y=16*S, w=250*S, h≈278*S`; LCD UV из `measurements.json`
-  (источник 371×413: `u0=93/371, v0=254/413, u1=233/371, v1=340/413`).
-- Книга: `x=radio.x+56*S, y=radio.y+radio.h+10*S, 126×158`.
-- **Interaction menu MYRP стилизуется под Aneurism IV, но действия не меняются.** Рисуется **только кнопки** — без панели, заголовка, подписи "`ДЕЙСТВИЕ`" и подсказок внизу. Кнопки — оригинальный спрайт `ui_button_bg.png` (352×48, извлечён из `data.unity3d` через UnityPy). Одно действие = одна кнопка. Надпись подбирается по размеру шрифтом 17→9 и при необходимости обрезается с `...`, чтобы не выходить за кнопку. `ui_panel.png` и `DrawWeaponMenuPanel()` оставлены в коде, но не вызываются.
-- **Полосы (по просьбе пользователя, по умолчанию):** ТОЛЬКО `BLOOD` и `AIR` (stamina). Капсула `265×39` — это реальный спрайт из игры (`bar_frame.png`), внутреннее окно `x20/y8/w225/h23`; gap `8`, ряд по центру внизу, `y = ScrH()-39*S-30*S`. Заливка = `bar_noise.png` (настоящий шум из игры) с tint `#C42C24`/`#3460E2`, ширина `iw*value/100`; незаполненная часть — серый шум. Текст ЗАГЛАВНЫМИ `BLOOD`/`AIR`, `Silkscreen 15*S`. Конвар `aniv_hud_bars_enabled 0` возвращает legacy-иконки. **Не перегенерируй текстуры процедурно** — они вырезаны из `docs/refs/hud_bars_reference.png` скриптом `tools/make_bar_textures.py`.
-- Иконки (legacy): 44px, gap 12, низ, чуть левее центра. Подсказки: `y=0.57*ScrH`.
-- Никогда не показывать розово-чёрный чекербоард — fallback на плоский цвет.
+- Рация: вики `File:Walkie_talkie_(1).png`; иконки — из `data.unity3d` (UnityPy)
+  и game-icons.net.
+- `bar_frame.png` / `bar_noise.png` вырезаны из `docs/refs/hud_bars_reference.png`
+  скриптом `tools/make_bar_textures.py`. **Не перегенерируй процедурно.**
+- `ui_button_bg.png` / `ui_panel.png` / `icon_check.png` извлечены из
+  `ANEURISM IV_Data/data.unity3d` скриптом `tools/extract_unity_ui.py` (UnityPy).
+- Шрифты Silkscreen/VT323 — OFL-аналоги (в игре TMP-атлас).
+- Ассеты ANEURISM IV — авторский материал Vellocet Software, только личные проекты.
 
 ---
 
-## 7. УЖЕ ИСПРАВЛЕННЫЕ ОШИБКИ — НЕ ПОВТОРЯТЬ
+## 9. Исправленные ошибки — НЕ ПОВТОРЯТЬ
 
-1. **VMT → `.vtf` которого нет.** `Material("aneurism_hud/name")` возвращает
-   *валидный* материал с текстурой `_error`, и `IsError()` это не ловит.
-   Поэтому в `M()` сначала грузится `Material("aneurism_hud/name.png","noclamp")`;
-   дополнительно `ANIV.MatReady()` проверяет имя `$basetexture` на `error`.
-2. **Множественные возвраты в списке аргументов.**
-   `ANIV.InRect(gui.MousePos(), x, y, w, h)` и `ANIV.InRect(self:CursorPos(), ...)`
-   обрезают два значения до одного → `h=nil` → ошибка каждый кадр.
-   Всегда `local mx, my = ...` и только потом вызов.
-3. **`IsSpec()` есть не везде.** Проверка спектатора только
-   `(ply.IsSpec and ply:IsSpec())`.
-4. **Кириллица не набирается через `KEY_*`.** Только `DTextEntry` ( системный ввод ).
-5. **`MakePopup()` меняет мышь за кулисами.** После закрытия чата:
-   `ANIV.State.uiMode = nil; ANIV.UpdateCursor()`.
-6. **PowerShell `Set-Content -Encoding UTF8` добавляет BOM и ломает Lua.**
-   Писать через `[IO.File]::WriteAllText($p,$txt,(New-Object Text.UTF8Encoding($false)))`.
-7. **Без `resource.AddFile` клиент видит шашечки.** Все 24 файла зарегистрированы;
-   `sv_allowdownload 1` в `cfg/server.cfg`.
-8. **Клиент не видит правки Lua без рестарта/переподключения.**
+1. **VMT без VTF:** `Material(".../name")` возвращает валидный материал с текстурой
+   `_error`; `IsError()` не ловит. Загрузка через `.png` первым + `MatReady()`.
+2. **Multi-return в аргументах:** `InRect(gui.MousePos(), ...)` обрезает 2 значения
+   до 1 → `h=nil`. Всегда `local mx, my = ...`.
+3. **`IsSpec()` есть не везде:** `(ply.IsSpec and ply:IsSpec())`.
+4. **Кириллица не через `KEY_*`:** только `DTextEntry`.
+5. **`MakePopup()` меняет мышь:** после закрытия `uiMode=nil; UpdateCursor()`.
+6. **BOM от PowerShell `Set-Content -Encoding UTF8`:** писать через
+   `[IO.File]::WriteAllText($p,$txt,(New-Object Text.UTF8Encoding($false)))`.
+7. **Без `resource.AddFile` клиент видит шашечки:** зарегистрировано 30 файлов,
+   плюс `sv_allowdownload 1` на сервере.
+8. **Lua не обновляется без рестарта/переподключения.**
 
 ---
 
-## 8. Чек-лист проверки перед сдачей
+## 10. Чек-лист перед сдачей
 
-- [ ] Прочитал `docs/PROMPT_ANEURISM_IV_UI.md` и `docs/refs/measurements.json`.
-- [ ] Сделал бэкап каждого изменяемого файла.
-- [ ] Lua 5.1: нет `!`, `&&`, `||`, `continue`; нет BOM.
-- [ ] Синтаксис проверен парсером:
-      `node check.js <path>` с `luaparse` (установка: `C:\Program Files\nodejs\npm.cmd install luaparse --prefix <temp>`).
-- [ ] Нет новых вызовов вида `InRect(gui.MousePos(), ...)` / `InRect(CursorPos(), ...)`.
-- [ ] Новые материалы грузятся через `.png` первыми; `MatReady()` не обходится.
-- [ ] Рация стартует **выключенной**; `Esc` не выключает её; второй клик возвращает чат.
-- [ ] Сообщение уходит только своей фракции; лог сервера `[ANIV][RADIO]` есть.
-- [ ] `aniv_hud_materials` → у всех строк `ready=true` и имя текстуры не `_error`.
-- [ ] `aniv_hud_debug` показывает ожидаемые `radio/radioChat/cursorUnlocked`.
-- [ ] HUD одинаково масштабируется на 1280×720 / 1920×1080 / 2560×1440.
-- [ ] Хуки моста (`MYRP.CustomHUD.Paint`) снимаются, но чужие хуки не удалены.
-- [ ] Файлы синхронизированы в обе копии сервера (`D:\steamcmd`, `D:\steamcmd2`), хэши совпадают.
-- [ ] Отчёт пользователю: что менял, что проверял, что нужно перезапустить.
-
----
-
-## 9. Быстрые ответы на частые вопросы другой модели
-
-**«Почему шашечки, хотя файлы скачаны?»** — VMT без VTF; читай раздел 7.1.
-**«Где взять точные UV?»** — `docs/refs/measurements.json`, не «на глаз».
-**«Почему X не работает?»** — рация должна быть ON; `X` открывает чат, а не голос.
-**«Как поменять клавиши?»** — конвары из раздела 3, не правь код.
-**«Нужно ли трогать myrp_hud?»** — нет; мост лишь снимает один хук `HUDPaint`.
-**«Можно ли удалить VMT?»** — не надо: они зарегистрированы в `resource.AddFile`;
-загрузка идёт через PNG, но VMT оставляем для совместимости.
-**«Где источники спрайтов?»** — вики `File:Walkie_talkie_(1).png`, иконки извлечены
-из `ANEURISM IV_Data/data.unity3d` (UnityPy) и game-icons.net; см. `README.md`.
+- [ ] Прочитал `docs/PROMPT_ANEURISM_IV_UI.md`, `measurements.json` и этот файл.
+- [ ] Бэкап каждого изменяемого файла.
+- [ ] Lua 5.1: нет `&&`, `||`, `continue` (GMod `!`/`!=` допустимы); нет BOM.
+- [ ] Синтаксис проверен: `node <temp>/luacheck/check.js <path>` (luaparse).
+- [ ] Нет `InRect(gui.MousePos(), ...)` / `InRect(CursorPos(), ...)`.
+- [ ] Новые материалы грузятся `.png` первыми, `MatReady()` не обходится.
+- [ ] Полосы: только BLOOD и AIR, текст не вылезает за капсулу.
+- [ ] Рация стартует OFF; `Esc` не выключает; второй клик возвращает чат.
+- [ ] Сообщение только своей фракции; есть лог `[ANIV][RADIO]`.
+- [ ] `aniv_hud_materials`: везде `ready=true`, имени `_error` нет.
+- [ ] `aniv_hud_debug`: `radio/radioChat/cursorUnlocked` как ожидалось.
+- [ ] HUD одинаков на 1280×720 / 1920×1080 / 2560×1440.
+- [ ] Мост снимает `MYRP.CustomHUD.Paint`, но не трогает чужие хуки.
+- [ ] Файлы синхронизированы в `D:\steamcmd` и `D:\steamcmd2`, хэши совпадают.
+- [ ] Отчёт пользователю: что менял, как проверял, что перезапустить.
 
 ---
 
-## 10. Что осталось незаделанным / известные отличия
+## 11. Быстрые ответы
 
-- Оригинал показывает **7 шкал** (Sense/Blood/Air/Sanity/Sepsis/Nourishment/Moisture);
-  по прямой просьбе пользователя оставлены **только BLOOD и AIR**. Старые 4 иконки
-  доступны через `aniv_hud_bars_enabled 0`. Референс 7 полос — в `docs/refs/`.
-- Текст LCD адаптирован под фракционную рацию; шрифт/положение/цвет — 1:1.
-- Голосовая трансляция заменена текстовым чатом (по просьбе пользователя).
-- Шрифты — OFL-аналоги (`Silkscreen`, `VT323`), не родной TMP-атлас игры.
-- Ассеты ANEURISM IV — авторский материал Vellocet Software; только для личных проектов.
+**Шашечки, хотя файлы скачаны?** VMT без VTF — читай п.9.1.
+**Где точные UV?** `docs/refs/measurements.json`.
+**X не работает?** Рация должна быть ON; X — чат, не голос.
+**Как поменять клавиши?** Конвары п.5, не правь код.
+**Трогать `myrp_hud`?** Нет; мост снимает только один хук.
+**Удалить VMT?** Нет — они зарегистрированы, загрузка идёт через PNG.
+**Где меню взаимодействия?** В репозитории `suda-moi-proecti`, не здесь.
+
+---
+
+## 12. Известные отличия от оригинала
+
+- Вместо 7 шкал — только BLOOD и AIR (по просьбе пользователя); legacy-4-иконки
+  доступны через `aniv_hud_bars_enabled 0`.
+- LCD адаптирован под фракционную рацию; положение/шрифт/цвет — 1:1.
+- Голосовая трансляция заменена текстовым фракционным чатом.
+- Шрифты — OFL-аналоги, не родной TMP-атлас игры.
